@@ -38,4 +38,3 @@ jwt:
 # CORS Configuration
 cors:
   allowed-origins: ${CORS_ALLOWED_ORIGINS}
-
