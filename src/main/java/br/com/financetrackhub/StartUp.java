@@ -8,12 +8,10 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 public class StartUp {
 
 	public static void main(String[] args) {
-		// Carrega variáveis do arquivo .env antes de iniciar a aplicação
 		Dotenv dotenv = Dotenv.configure()
-				.ignoreIfMissing() // Não falha se o arquivo .env não existir
+				.ignoreIfMissing()
 				.load();
 		
-		// Define as variáveis de ambiente do sistema a partir do .env
 		dotenv.entries().forEach(entry -> {
 			if (System.getProperty(entry.getKey()) == null) {
 				System.setProperty(entry.getKey(), entry.getValue());

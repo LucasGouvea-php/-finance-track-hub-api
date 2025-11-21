@@ -64,7 +64,6 @@ public class TransactionService {
                     user, transactionType, categoryId, startDate, endDate, pageable);
         }
         
-        // Força o carregamento das categorias antes de converter para response
         transactionPage.getContent().forEach(t -> {
             Hibernate.initialize(t.getCategory());
         });
@@ -87,7 +86,6 @@ public class TransactionService {
         User user = userService.findByEmail(userEmail);
         Transaction transaction = transactionRepository.findByIdAndUser(id, user)
                 .orElseThrow(() -> new BadRequestException("Transação não encontrada"));
-        // Força o carregamento da categoria
         Hibernate.initialize(transaction.getCategory());
         return toResponse(transaction);
     }
@@ -96,7 +94,6 @@ public class TransactionService {
     public TransactionResponse create(TransactionRequest request, String userEmail) {
         User user = userService.findByEmail(userEmail);
         
-        // Valida e converte o tipo
         Transaction.TransactionType transactionType;
         try {
             transactionType = Transaction.TransactionType.valueOf(request.getType().toUpperCase());
@@ -104,7 +101,6 @@ public class TransactionService {
             throw new BadRequestException("Tipo de transação inválido. Use 'INCOME' ou 'EXPENSE'");
         }
         
-        // Busca a categoria e valida se pertence ao usuário
         Category category = categoryRepository.findByIdAndUser(request.getCategoryId(), user)
                 .orElseThrow(() -> new BadRequestException("Categoria não encontrada ou não pertence ao usuário"));
         
@@ -126,7 +122,6 @@ public class TransactionService {
         Transaction transaction = transactionRepository.findByIdAndUser(id, user)
                 .orElseThrow(() -> new BadRequestException("Transação não encontrada"));
         
-        // Valida e converte o tipo
         Transaction.TransactionType transactionType;
         try {
             transactionType = Transaction.TransactionType.valueOf(request.getType().toUpperCase());
@@ -134,7 +129,6 @@ public class TransactionService {
             throw new BadRequestException("Tipo de transação inválido. Use 'INCOME' ou 'EXPENSE'");
         }
         
-        // Busca a categoria e valida se pertence ao usuário
         Category category = categoryRepository.findByIdAndUser(request.getCategoryId(), user)
                 .orElseThrow(() -> new BadRequestException("Categoria não encontrada ou não pertence ao usuário"));
         
@@ -161,10 +155,8 @@ public class TransactionService {
         User user = userService.findByEmail(userEmail);
         List<Transaction> transactions = transactionRepository.findByUserOrderByDateAsc(user);
         
-        // Força o carregamento das categorias
         transactions.forEach(t -> Hibernate.initialize(t.getCategory()));
         
-        // Calcula o resumo (summary)
         BigDecimal income = transactions.stream()
                 .filter(t -> t.getType() == Transaction.TransactionType.INCOME)
                 .map(Transaction::getValue)
@@ -179,7 +171,6 @@ public class TransactionService {
         
         DashboardResponse.Summary summary = new DashboardResponse.Summary(income, expenses, balance);
         
-        // Calcula dados por categoria (apenas despesas)
         Map<String, BigDecimal> expensesByCategory = transactions.stream()
                 .filter(t -> t.getType() == Transaction.TransactionType.EXPENSE)
                 .collect(Collectors.groupingBy(
@@ -191,12 +182,10 @@ public class TransactionService {
                 .map(entry -> new DashboardResponse.CategoryData(entry.getKey(), entry.getValue()))
                 .collect(Collectors.toList());
         
-        // Calcula dados mensais (evolução financeira) - do primeiro dia até a última transação do mês
         LocalDate now = LocalDate.now();
         LocalDate firstDayOfMonth = now.withDayOfMonth(1);
         LocalDate lastDayOfMonth = now.withDayOfMonth(now.lengthOfMonth());
         
-        // Calcula o saldo inicial (todas as transações antes do mês atual)
         BigDecimal initialBalance = transactions.stream()
                 .filter(t -> t.getDate().isBefore(firstDayOfMonth))
                 .map(t -> t.getType() == Transaction.TransactionType.INCOME 
@@ -204,30 +193,24 @@ public class TransactionService {
                         : t.getValue().negate())
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
         
-        // Filtra transações do mês atual
         List<Transaction> currentMonthTransactions = transactions.stream()
                 .filter(t -> !t.getDate().isBefore(firstDayOfMonth) && !t.getDate().isAfter(lastDayOfMonth))
                 .collect(Collectors.toList());
         
-        // Se não houver transações no mês, retorna lista vazia
         if (currentMonthTransactions.isEmpty()) {
             return new DashboardResponse(summary, categoryData, new ArrayList<>());
         }
         
-        // Encontra a data da última transação do mês
         LocalDate lastTransactionDate = currentMonthTransactions.stream()
                 .map(Transaction::getDate)
                 .max(LocalDate::compareTo)
                 .orElse(firstDayOfMonth);
         
-        // Limita até a última transação (não mostra dias futuros nem além da última transação)
-        // Se a última transação for no futuro, limita até hoje
         LocalDate endDate = lastTransactionDate;
         if (endDate.isAfter(now)) {
             endDate = now;
         }
         
-        // Cria um mapa de transações por dia
         Map<LocalDate, BigDecimal> transactionsByDate = currentMonthTransactions.stream()
                 .collect(Collectors.groupingBy(
                         Transaction::getDate,
@@ -240,12 +223,10 @@ public class TransactionService {
                         )
                 ));
         
-        // Gera lista do primeiro dia do mês até o dia da última transação (inclusive)
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM");
         List<DashboardResponse.MonthlyData> monthlyData = new ArrayList<>();
         BigDecimal runningBalance = initialBalance;
         
-        // Itera do primeiro dia do mês até o dia da última transação (inclusive)
         LocalDate currentDate = firstDayOfMonth;
         while (currentDate.isBefore(endDate) || currentDate.isEqual(endDate)) {
             BigDecimal dayValue = transactionsByDate.getOrDefault(currentDate, BigDecimal.ZERO);
@@ -258,7 +239,6 @@ public class TransactionService {
             
             currentDate = currentDate.plusDays(1);
             
-            // Proteção adicional: para se passar do endDate
             if (currentDate.isAfter(endDate)) {
                 break;
             }

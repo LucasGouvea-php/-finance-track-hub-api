@@ -13,7 +13,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 public class TransactionResponse {
     private Long id;
-    private String type; // "INCOME" ou "EXPENSE"
+    private String type;
     private BigDecimal value;
     private String description;
     private LocalDate date;

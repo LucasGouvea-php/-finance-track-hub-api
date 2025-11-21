@@ -66,7 +66,6 @@ public class CategoryService {
     public CategoryResponse create(CategoryRequest request, String userEmail) {
         User user = userService.findByEmail(userEmail);
         
-        // Verifica se já existe uma categoria com o mesmo nome para o usuário
         if (categoryRepository.existsByNameAndUser(request.getName(), user)) {
             throw new BadRequestException("Já existe uma categoria com este nome");
         }
@@ -85,7 +84,6 @@ public class CategoryService {
         Category category = categoryRepository.findByIdAndUser(id, user)
                 .orElseThrow(() -> new BadRequestException("Categoria não encontrada"));
         
-        // Verifica se já existe outra categoria com o mesmo nome (exceto a atual)
         if (!category.getName().equals(request.getName()) && 
             categoryRepository.existsByNameAndUser(request.getName(), user)) {
             throw new BadRequestException("Já existe uma categoria com este nome");

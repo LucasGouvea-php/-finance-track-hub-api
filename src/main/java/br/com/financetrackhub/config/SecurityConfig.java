@@ -49,7 +49,7 @@ public class SecurityConfig {
             )
             .authenticationProvider(authenticationProvider())
             .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
-            .headers(headers -> headers.frameOptions().disable()); // Para H2 Console
+            .headers(headers -> headers.frameOptions().disable());
         
         return http.build();
     }
