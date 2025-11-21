@@ -2,7 +2,7 @@
 
 API REST desenvolvida em Spring Boot para gerenciamento de finanças pessoais. Sistema completo de controle financeiro com autenticação JWT, gerenciamento de transações, categorias e dashboard com estatísticas.
 
-## 📋 Índice
+## Índice
 
 - [Tecnologias](#-tecnologias)
 - [Pré-requisitos](#-pré-requisitos)
@@ -13,7 +13,7 @@ API REST desenvolvida em Spring Boot para gerenciamento de finanças pessoais. S
 - [Autenticação](#-autenticação)
 - [Banco de Dados](#-banco-de-dados)
 
-## 🚀 Tecnologias
+## Tecnologias
 
 - **Java 21**
 - **Spring Boot 3.5.7**
@@ -25,7 +25,7 @@ API REST desenvolvida em Spring Boot para gerenciamento de finanças pessoais. S
 - **Lombok** - Redução de boilerplate
 - **Maven** - Gerenciamento de dependências
 
-## 📦 Pré-requisitos
+## Pré-requisitos
 
 Antes de começar, certifique-se de ter instalado:
 
@@ -34,7 +34,7 @@ Antes de começar, certifique-se de ter instalado:
 - **MySQL 8.0+** (ou use H2 para desenvolvimento)
 - **Git** (opcional)
 
-## ⚙️ Configuração
+## Configuração
 
 ### 1. Clone o repositório
 
@@ -50,9 +50,9 @@ Edite o arquivo `src/main/resources/application.yml` e ajuste as configurações
 ```yaml
 spring:
   datasource:
-    url: jdbc:mysql://localhost:3306/finance_track_hub?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true&useTimezone=true
-    username: seu_usuario
-    password: sua_senha
+    url: ${DB_URL}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
 ```
 
 ### 3. Crie o banco de dados MySQL
@@ -69,8 +69,8 @@ Por padrão, o projeto já possui um JWT secret configurado. Para produção, re
 
 ```yaml
 jwt:
-  secret: seu_secret_jwt_aqui
-  expiration: 86400000  # 24 horas em milissegundos
+  secret: ${JWT_SECRET}
+  expiration: ${JWT_EXPIRATION:86400000}  # 24 horas em milissegundos
 ```
 
 ### 5. Configure CORS (Opcional)
@@ -79,10 +79,10 @@ Ajuste as origens permitidas em `application.yml` conforme necessário:
 
 ```yaml
 cors:
-  allowed-origins: http://localhost:5173,http://localhost:3000,http://localhost:8081
+  allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:8081}
 ```
 
-## 🏃 Executando o Projeto
+## Executando o Projeto
 
 ### Usando Maven Wrapper (Recomendado)
 
@@ -109,9 +109,9 @@ mvn clean package
 java -jar target/finance-track-hub-api-0.0.1-SNAPSHOT.jar
 ```
 
-A API estará disponível em: `http://localhost:8080`
+A API estará disponível em: `http://localhost:${SERVER_PORT:8080}`
 
-## 📁 Estrutura do Projeto
+## Estrutura do Projeto
 
 ```
 src/main/java/br/com/financetrackhub/
@@ -126,7 +126,7 @@ src/main/java/br/com/financetrackhub/
 └── StartUp.java         # Classe principal
 ```
 
-## 🔌 Endpoints da API
+## Endpoints da API
 
 ### Autenticação
 
@@ -220,7 +220,7 @@ Content-Type: application/json
 }
 ```
 
-## 🔐 Autenticação
+## Autenticação
 
 A API utiliza JWT (JSON Web Token) para autenticação. Após fazer login ou registro, você receberá um token que deve ser enviado no header de todas as requisições protegidas:
 
@@ -234,7 +234,7 @@ curl -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..." \
      http://localhost:8080/api/transactions
 ```
 
-## 🗄️ Banco de Dados
+## Banco de Dados
 
 ### Entidades Principais
 
@@ -248,16 +248,7 @@ curl -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..." \
 - Uma **Transaction** pertence a uma **Category**
 - Uma **Category** pode ter várias **Transactions**
 
-### H2 Console (Desenvolvimento)
-
-Para acessar o console H2 durante o desenvolvimento:
-
-1. Acesse: `http://localhost:8080/h2-console`
-2. JDBC URL: `jdbc:h2:mem:testdb` (ou conforme configurado)
-3. Username: `sa`
-4. Password: (deixe em branco ou conforme configurado)
-
-## 🧪 Testes
+## Testes
 
 Execute os testes com:
 
@@ -265,7 +256,7 @@ Execute os testes com:
 mvn test
 ```
 
-## 📝 Notas de Desenvolvimento
+## Notas de Desenvolvimento
 
 - O projeto utiliza **Lombok** para reduzir código boilerplate
 - As senhas são criptografadas usando **BCrypt**
@@ -273,24 +264,6 @@ mvn test
 - CORS está configurado para permitir requisições do frontend
 - O projeto utiliza **Spring Boot DevTools** para hot reload durante desenvolvimento
 
-## 🤝 Contribuindo
-
-1. Faça um fork do projeto
-2. Crie uma branch para sua feature (`git checkout -b feature/AmazingFeature`)
-3. Commit suas mudanças (`git commit -m 'Add some AmazingFeature'`)
-4. Push para a branch (`git push origin feature/AmazingFeature`)
-5. Abra um Pull Request
-
-## 📄 Licença
-
-Este projeto está sob a licença MIT.
-
-## 👨‍💻 Autor
+## Autor
 
 Desenvolvido como parte do projeto Finance Track Hub.
-
----
-
-**Versão:** 0.0.1-SNAPSHOT  
-**Última atualização:** 2024
-
